@@ -23,6 +23,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Update paket-paket yang tersedia dan instal dependensi yang diperlukan
 RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    unzip \
     apache2 \
     mysql-server \
     php \
@@ -49,11 +51,11 @@ WORKDIR /var/www/html
 
 # Unduh dan ekstrak Elgg
 RUN apt-get install -y wget && \
-    wget https://elgg.org/download/elgg-3.3.16.zip && \
-    unzip elgg-3.3.16.zip && \
-    mv elgg-3.3.16/* . && \
-    rm elgg-3.3.16.zip && \
-    rm -rf elgg-3.3.16
+    wget https://elgg.org/download/elgg-1.7.10.zip && \
+    unzip elgg-1.7.10.zip && \
+    mv elgg-1.7.10/* . && \
+    rm elgg-1.7.10.zip && \
+    rm -rf elgg-1.7.10
 
 # Set izin untuk direktori Elgg
 RUN chown -R www-data:www-data /var/www/html
