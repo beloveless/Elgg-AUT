@@ -1,0 +1,68 @@
+name: Build and Test Elgg
+on:
+  push:
+    branches:
+      - main
+jobs:
+  dast:
+    name: DAST
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v4
+
+      - name: Create isolated network
+        run: docker network create --driver bridge isolated  
+        
+      - name: Build AUT
+        run: docker build -t elgg-app .
+  
+      - name: Run Elgg container
+        run: docker run -d --network=isolated --name elgg-container elgg-app
+
+      - name: Check if Elgg is running
+        run: docker exec elgg-container curl -s http://elgg-container | grep "Elgg"
+  
+      - name: Run AUT using docker-compose
+        run: docker-compose up -d
+      
+      - name: Get AUT URL
+        run: |
+          URL=$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1)
+          echo "URL=$URL" >> $GITHUB_ENV
+
+      - name: Context Setup
+        # env:
+        #     # Set a previously defined secret as an environment variable for this step:
+        #     AUTURL: ${{secrets.B64PASSWORD}}
+        # Replace the "AUTURL" string in the context file with the real base64-encoded password:
+        run: |
+          sed -ie "s/AUTURL/${{ env.URL }}/" badcrud.context
+        
+      - name: ZAP Scan
+        uses: hermanka/action-full-scan@master
+        with:
+          target: http://${{ env.URL }}
+          network_name: isolated
+          # Additional command line options
+          # -j   runs the AJAX spider
+          # -U   specifies which user to select from the context file
+          cmd_options: -U "admin" -n badcrud.context
+
+      - name: stop docker
+        run: docker stop docker-apache
+  
+
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
