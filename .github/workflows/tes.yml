@@ -14,7 +14,25 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build Docker image
-        run: docker build -t elgg-app .
+        run: docker-compose build
 
       - name: Run Elgg container
-        run: docker run -d --name elgg-container -p 80:80 elgg-app
+        run: docker-compose up -d
+
+      - name: Wait for Elgg to start
+        run: sleep 30
+
+      - name: Check Elgg availability
+        run: |
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+          if [ $status_code -eq 200 ]; then
+            echo "Elgg is running successfully."
+          else
+            echo "Failed to access Elgg. Status code: $status_code"
+            exit 1
+          fi
+
+      # Add additional steps for functional testing if needed
+      # - name: Run Elgg functional tests
+      #   run: |
+      #     # Your functional tests commands here

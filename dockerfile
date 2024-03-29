@@ -16,8 +16,8 @@
 
 # EXPOSE 80
 
-# Menggunakan base image Ubuntu 20.04 LTS
-FROM ubuntu:20.04
+# Menggunakan base image Ubuntu 18.04 LTS
+FROM ubuntu:18.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -42,7 +42,7 @@ RUN a2enmod rewrite
 COPY apache2.conf /etc/apache2/apache2.conf
 
 # Restart Apache untuk menerapkan perubahan konfigurasi
-RUN service apache2 restart
+# RUN service apache2 restart
 
 # Buat direktori tempat Elgg akan diinstal
 WORKDIR /var/www/html

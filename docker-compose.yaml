@@ -1,51 +1,28 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  elgg:
+  web:
     build: .
     ports:
       - "80:80"
     volumes:
-      - ./src:/var/www/html
+      - ./apache2.conf:/etc/apache2/apache2.conf
+      - ./html:/var/www/html
+    environment:
+      DEBIAN_FRONTEND: noninteractive
+    command: ["apache2ctl", "-D", "FOREGROUND"]
     depends_on:
       - db
-    environment:
-      ELGG_DATABASE_HOST: db
-      ELGG_DATABASE_NAME: elgg
-      ELGG_DATABASE_USER: elgguser
-      ELGG_DATABASE_PASS: elggpass
-    networks:
-      - my-network
 
   db:
     image: mysql:latest
-    container_name: mysql-container
     environment:
-      MYSQL_DATABASE: elgg
-      MYSQL_USER: elgguser
-      MYSQL_PASSWORD: elggpass
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: elgg_db
+      MYSQL_USER: elgg_user
+      MYSQL_PASSWORD: elgg_password
     volumes:
-      - elgg-db:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    networks:
-      - my-network
-
-  zap:
-    image: owasp/zap2docker-weekly
-    container_name: zap-container
-    command: ["zap.sh", "-daemon", "-port", "8090", "-host", "0.0.0.0", "-config", "api.disablekey=true", "-ajaxSpider", "-scan", "-recursive", "-spider", "1", "-url", "http://elgg:80/index.php"]
-    ports:
-      - "8090:8090"
-    depends_on:
-      - elgg
-    networks:
-      - my-network
-
-networks:
-  my-network:
-    driver: bridge
+      - db_data:/var/lib/mysql
 
 volumes:
-  elgg-db:
+  db_data:
