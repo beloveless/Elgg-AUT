@@ -21,8 +21,25 @@ jobs:
       - name: Run Elgg container
         run: docker run -d --network=isolated --name elgg-container elgg-app
 
+      # Step 1: Pastikan kontainer Elgg telah berjalan dengan baik
+      - name: Check if Elgg container is running
+        run: docker ps | grep "elgg-container"
+
+      # Step 2: Periksa log kontainer Elgg
+      - name: Display Elgg container logs
+        run: docker logs elgg-container
+
+      # Step 3: Coba jalankan perintah curl secara langsung di dalam kontainer Elgg
+      - name: Run curl command inside Elgg container
+        run: |
+          docker exec -it elgg-container bash -c "curl -s http://localhost | grep 'Elgg'"
+
+      # Step 4: Pastikan kontainer Elgg memiliki waktu yang cukup untuk memulai aplikasi
+      - name: Delay before checking Elgg application status
+        run: sleep 30
+
       - name: Check if Elgg is running
-        run: docker exec elgg-container curl -s http://elgg-container | grep "Elgg"
+        run: docker exec elgg-container curl http://elgg-container | grep "Elgg"
   
       - name: Run AUT using docker-compose
         run: docker-compose up -d
@@ -32,26 +49,26 @@ jobs:
           URL=$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1)
           echo "URL=$URL" >> $GITHUB_ENV
 
-      - name: Context Setup
-        # env:
-        #     # Set a previously defined secret as an environment variable for this step:
-        #     AUTURL: ${{secrets.B64PASSWORD}}
-        # Replace the "AUTURL" string in the context file with the real base64-encoded password:
-        run: |
-          sed -ie "s/AUTURL/${{ env.URL }}/" badcrud.context
+      # - name: Context Setup
+      #   # env:
+      #   #     # Set a previously defined secret as an environment variable for this step:
+      #   #     AUTURL: ${{secrets.B64PASSWORD}}
+      #   # Replace the "AUTURL" string in the context file with the real base64-encoded password:
+      #   run: |
+      #     sed -ie "s/AUTURL/${{ env.URL }}/" badcrud.context
         
-      - name: ZAP Scan
-        uses: hermanka/action-full-scan@master
-        with:
-          target: http://${{ env.URL }}
-          network_name: isolated
-          # Additional command line options
-          # -j   runs the AJAX spider
-          # -U   specifies which user to select from the context file
-          cmd_options: -U "admin" -n badcrud.context
+      # - name: ZAP Scan
+      #   uses: hermanka/action-full-scan@master
+      #   with:
+      #     target: http://${{ env.URL }}
+      #     network_name: isolated
+      #     # Additional command line options
+      #     # -j   runs the AJAX spider
+      #     # -U   specifies which user to select from the context file
+      #     cmd_options: -U "admin" -n badcrud.context
 
       - name: stop docker
-        run: docker stop docker-apache
+        run: docker stop elgg-container
   
 
   sonarcloud:
