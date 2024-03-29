@@ -1,5 +1,6 @@
 # FROM php:8.0-apache
 
+
 # RUN apt-get update && \
 #     apt-get install -y \
 #         libzip-dev \
@@ -17,6 +18,8 @@
 
 # Menggunakan base image Ubuntu 20.04 LTS
 FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Update paket-paket yang tersedia dan instal dependensi yang diperlukan
 RUN apt-get update && apt-get install -y \
