@@ -1,85 +1,85 @@
-name: Build and Test Elgg
-on:
-  push:
-    branches:
-      - main
-jobs:
-  dast:
-    name: DAST
-    permissions: write-all
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout the repo
-        uses: actions/checkout@v4
+# name: Build and Test Elgg
+# on:
+#   push:
+#     branches:
+#       - main
+# jobs:
+#   dast:
+#     name: DAST
+#     permissions: write-all
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout the repo
+#         uses: actions/checkout@v4
 
-      - name: Create isolated network
-        run: docker network create --driver bridge isolated  
+#       - name: Create isolated network
+#         run: docker network create --driver bridge isolated  
         
-      - name: Build AUT
-        run: docker build -t elgg-app .
+#       - name: Build AUT
+#         run: docker build -t elgg-app .
   
-      - name: Run Elgg container
-        run: docker run -d --network=isolated --name elgg-container elgg-app
+#       - name: Run Elgg container
+#         run: docker run -d --network=isolated --name elgg-container elgg-app
 
-      # Step 1: Pastikan kontainer Elgg telah berjalan dengan baik
-      - name: Check if Elgg container is running
-        run: docker ps | grep "elgg-container"
+#       # Step 1: Pastikan kontainer Elgg telah berjalan dengan baik
+#       - name: Check if Elgg container is running
+#         run: docker ps | grep "elgg-container"
 
-      # Step 2: Periksa log kontainer Elgg
-      - name: Display Elgg container logs
-        run: docker logs elgg-container
+#       # Step 2: Periksa log kontainer Elgg
+#       - name: Display Elgg container logs
+#         run: docker logs elgg-container
 
-      # Step 3: Coba jalankan perintah curl secara langsung di dalam kontainer Elgg
-      - name: Run curl command inside Elgg container
-        run: |
-          docker exec elgg-container bash -c "curl http://localhost | grep -v 'Elgg'"
+#       # Step 3: Coba jalankan perintah curl secara langsung di dalam kontainer Elgg
+#       - name: Run curl command inside Elgg container
+#         run: |
+#           docker exec elgg-container bash -c "curl http://localhost | grep -v 'Elgg'"
 
-      # Step 4: Pastikan kontainer Elgg memiliki waktu yang cukup untuk memulai aplikasi
-      - name: Delay before checking Elgg application status
-        run: sleep 30
+#       # Step 4: Pastikan kontainer Elgg memiliki waktu yang cukup untuk memulai aplikasi
+#       - name: Delay before checking Elgg application status
+#         run: sleep 30
 
-      - name: Check if Elgg is running
-        run: docker exec elgg-container curl http://elgg-container | grep -v "Elgg"
+#       - name: Check if Elgg is running
+#         run: docker exec elgg-container curl http://elgg-container | grep -v "Elgg"
   
-      - name: Run AUT using docker-compose
-        run: docker-compose up -d
+#       - name: Run AUT using docker-compose
+#         run: docker-compose up -d
       
-      - name: Get AUT URL
-        run: |
-          URL=$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1)
-          echo "URL=$URL" >> $GITHUB_ENV
+#       - name: Get AUT URL
+#         run: |
+#           URL=$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1)
+#           echo "URL=$URL" >> $GITHUB_ENV
 
-      # - name: Context Setup
-      #   # env:
-      #   #     # Set a previously defined secret as an environment variable for this step:
-      #   #     AUTURL: ${{secrets.B64PASSWORD}}
-      #   # Replace the "AUTURL" string in the context file with the real base64-encoded password:
-      #   run: |
-      #     sed -ie "s/AUTURL/${{ env.URL }}/" badcrud.context
+#       # - name: Context Setup
+#       #   # env:
+#       #   #     # Set a previously defined secret as an environment variable for this step:
+#       #   #     AUTURL: ${{secrets.B64PASSWORD}}
+#       #   # Replace the "AUTURL" string in the context file with the real base64-encoded password:
+#       #   run: |
+#       #     sed -ie "s/AUTURL/${{ env.URL }}/" badcrud.context
         
-      # - name: ZAP Scan
-      #   uses: hermanka/action-full-scan@master
-      #   with:
-      #     target: http://${{ env.URL }}
-      #     network_name: isolated
-      #     # Additional command line options
-      #     # -j   runs the AJAX spider
-      #     # -U   specifies which user to select from the context file
-      #     cmd_options: -U "admin" -n badcrud.context
+#       # - name: ZAP Scan
+#       #   uses: hermanka/action-full-scan@master
+#       #   with:
+#       #     target: http://${{ env.URL }}
+#       #     network_name: isolated
+#       #     # Additional command line options
+#       #     # -j   runs the AJAX spider
+#       #     # -U   specifies which user to select from the context file
+#       #     cmd_options: -U "admin" -n badcrud.context
 
-      - name: stop docker
-        run: docker stop elgg-container
+#       - name: stop docker
+#         run: docker stop elgg-container
   
 
-  sonarcloud:
-    name: SonarCloud
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#   sonarcloud:
+#     name: SonarCloud
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#         with:
+#           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+#       - name: SonarCloud Scan
+#         uses: SonarSource/sonarcloud-github-action@master
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+#           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

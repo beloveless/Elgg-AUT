@@ -1,0 +1,20 @@
+name: Build and Run Elgg
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build Docker image
+        run: docker build -t elgg-app .
+
+      - name: Run Elgg container
+        run: docker run -d --name elgg-container -p 80:80 elgg-app
