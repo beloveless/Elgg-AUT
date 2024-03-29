@@ -24,17 +24,20 @@ jobs:
           n=0
           until [ $n -ge 5 ]
           do
-            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
-            if [ $status_code -eq 200 ]; then
-              echo "Elgg is running successfully."
-              exit 0
-            else
-              echo "Failed to access Elgg. Status code: $status_code. Retrying in 10 seconds..."
-              n=$((n+1))
-              sleep 10
-            fi
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+          if [ $status_code -eq 200 ]; then
+            echo "Elgg is running successfully."
+          else
+            echo "Failed to access Elgg. Status code: $status_code. Retrying in 10 seconds..."
+            curl_output=$(curl -s http://localhost)
+            echo "Curl output: $curl_output"
+            exit 1
+          fi
           done
           exit 1
+
+      - name:  Periksa Log
+        run: man curl | grep "exit code 56"
 
     #   - name: Check Elgg availability
     #     run: |
