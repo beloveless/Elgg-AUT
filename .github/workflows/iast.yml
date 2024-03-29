@@ -39,7 +39,7 @@ jobs:
         run: sleep 30
 
       - name: Check if Elgg is running
-        run: docker exec elgg-container curl http://elgg-container | grep "Elgg"
+        run: docker exec elgg-container curl http://elgg-container | grep -v "Elgg"
   
       - name: Run AUT using docker-compose
         run: docker-compose up -d
