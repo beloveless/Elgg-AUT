@@ -49,13 +49,8 @@ COPY apache2.conf /etc/apache2/apache2.conf
 # Buat direktori tempat Elgg akan diinstal
 WORKDIR /var/www/html
 
-# Unduh dan ekstrak Elgg
-RUN apt-get install -y wget && \
-    wget https://elgg.org/download/elgg-1.7.10.zip && \
-    unzip elgg-1.7.10.zip && \
-    mv elgg-1.7.10/* . && \
-    rm elgg-1.7.10.zip && \
-    rm -rf elgg-1.7.10
+# Salin Elgg ke dalam direktori kerja
+COPY src/ .
 
 # Set izin untuk direktori Elgg
 RUN chown -R www-data:www-data /var/www/html
