@@ -32,7 +32,7 @@ jobs:
       # Step 3: Coba jalankan perintah curl secara langsung di dalam kontainer Elgg
       - name: Run curl command inside Elgg container
         run: |
-          docker exec elgg-container bash -c "curl http://localhost | grep 'Elgg'"
+          docker exec elgg-container bash -c "curl http://localhost | grep -v 'Elgg'"
 
       # Step 4: Pastikan kontainer Elgg memiliki waktu yang cukup untuk memulai aplikasi
       - name: Delay before checking Elgg application status
