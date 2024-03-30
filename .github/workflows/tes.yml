@@ -24,37 +24,37 @@ jobs:
           URL=$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1)
           echo "URL=$URL" >> $GITHUB_ENV
 
-      # - name: Checking service availability
-      #   run: |
-      #     max_attempts=5
-      #     retry_interval=10
-      #     # Menggunakan port 80 sesuai contoh Docker Compose dan alamat IP 127.0.0.1
-      #     service_url=http://127.0.0.1:80
+      - name: Checking service availability
+        run: |
+          max_attempts=5
+          retry_interval=10
+          # Menggunakan port 80 sesuai contoh Docker Compose dan alamat IP 127.0.0.1
+          service_url=http://172.17.0.1:80
           
-      #     for ((attempt=1; attempt<=max_attempts; attempt++)); do
-      #       echo "Checking service availability (Attempt $attempt of $max_attempts)..."
-      #       # Menyimpan response body ke file untuk debugging
-      #       curl_output=$(curl -s -w "%{http_code}" -o response.txt "$service_url")
-      #       # Membaca status code dari output
-      #       status_code=$(tail -n1 response.txt)
-      #       echo "Response Body:"
-      #       cat response.txt
-      #       echo "Status Code: $status_code"
+          for ((attempt=1; attempt<=max_attempts; attempt++)); do
+            echo "Checking service availability (Attempt $attempt of $max_attempts)..."
+            # Menyimpan response body ke file untuk debugging
+            curl_output=$(curl -s -w "%{http_code}" -o response.txt "$service_url")
+            # Membaca status code dari output
+            status_code=$(tail -n1 response.txt)
+            echo "Response Body:"
+            cat response.txt
+            echo "Status Code: $status_code"
             
-      #       if [[ "$status_code" -eq 200 ]]; then
-      #         echo "Service is available."
-      #         exit 0
-      #       else
-      #         echo "Service is not available yet. Status code: $status_code."
-      #         if [[ $attempt -lt $max_attempts ]]; then
-      #           echo "Waiting $retry_interval seconds before retrying..."
-      #           sleep $retry_interval
-      #         else
-      #           echo "Max attempts reached. Unable to confirm service availability."
-      #           exit 1
-      #         fi
-      #       fi
-      #     done
+            if [[ "$status_code" -eq 200 ]]; then
+              echo "Service is available."
+              exit 0
+            else
+              echo "Service is not available yet. Status code: $status_code."
+              if [[ $attempt -lt $max_attempts ]]; then
+                echo "Waiting $retry_interval seconds before retrying..."
+                sleep $retry_interval
+              else
+                echo "Max attempts reached. Unable to confirm service availability."
+                exit 1
+              fi
+            fi
+          done
 
           
       # - name:  Periksa Log
