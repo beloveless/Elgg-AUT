@@ -21,6 +21,7 @@ jobs:
 
       - name: Get AUT URL
         run: |
+          sleep 30 # Tunggu 30 detik sebelum mendapatkan alamat URL
           URL=$(ip -f inet -o addr show docker0 | awk '{print $4}' | cut -d '/' -f 1)
           echo "URL=$URL" >> $GITHUB_ENV
 
