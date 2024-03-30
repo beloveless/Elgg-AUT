@@ -28,8 +28,8 @@ jobs:
         run: |
           max_attempts=5
           retry_interval=10
-          # Menggunakan port 80 sesuai contoh Docker Compose dan alamat IP 127.0.0.1
-          service_url=http://172.17.0.1:80
+          # Menggunakan port 80 sesuai contoh Docker Compose dan alamat IP host yang telah didapatkan
+          service_url=http://$URL:80
           
           for ((attempt=1; attempt<=max_attempts; attempt++)); do
             echo "Checking service availability (Attempt $attempt of $max_attempts)..."
@@ -55,22 +55,3 @@ jobs:
               fi
             fi
           done
-
-          
-      # - name:  Periksa Log
-      #   run: man curl | grep "exit code 56"
-
-    #   - name: Check Elgg availability
-    #     run: |
-    #       status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
-    #       if [ $status_code -eq 200 ]; then
-    #         echo "Elgg is running successfully."
-    #       else
-    #         echo "Failed to access Elgg. Status code: $status_code"
-    #         exit 1
-    #       fi
-
-      # Add additional steps for functional testing if needed
-      # - name: Run Elgg functional tests
-      #   run: |
-      #     # Your functional tests commands here
