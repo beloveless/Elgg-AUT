@@ -22,20 +22,29 @@ jobs:
       - name: Wait for Elgg to start
         run: |
           n=0
-          until [ $n -ge 5 ]
+          max_attempts=5
+          retry_interval=10
+          
+          until [ $n -ge $max_attempts ]
           do
-          status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
-          if [ $status_code -eq 200 ]; then
-            echo "Elgg is running successfully."
-          else
-            echo "Failed to access Elgg. Status code: $status_code. Retrying in 10 seconds..."
-            curl_output=$(curl -s http://localhost)
-            echo "Curl output: $curl_output"
-            exit 1
-          fi
+            status_code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost)
+            if [ "$status_code" -eq 200 ]; then
+              echo "Elgg is running successfully."
+              exit 0
+            else
+              echo "Failed to access Elgg. Status code: $status_code. Retrying in $retry_interval seconds..."
+              if [ $n -eq $((max_attempts - 1)) ]; then
+                curl_output=$(curl -s http://localhost)
+                echo "Curl output on final attempt: $curl_output"
+              fi
+              n=$((n+1))
+              sleep $retry_interval
+            fi
           done
+          
+          echo "Failed to confirm Elgg is running after $max_attempts attempts."
           exit 1
-
+          
       - name:  Periksa Log
         run: man curl | grep "exit code 56"
 
